@@ -107,9 +107,3 @@ func _on_expand() -> void:
 			add_child(dlg)
 			dlg.popup_centered()
 			dlg.confirmed.connect(dlg.queue_free)
-
-
-## Статический хелпер для других скриптов: получить UI-менеджер
-
-static func get() -> Node:
-	return Engine.get_main_loop().root.get_tree().get_first_node_in_group("ui_manager")
