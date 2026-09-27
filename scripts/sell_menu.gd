@@ -1,13 +1,12 @@
 extends Control
-## SellMenu — меню продажи мотоцикла. 1–3 покупателя со случайными
-## предложениями, возможность поторговаться и принять/отклонить сделку.
+## SellMenu — меню продажи мотоцикла.
 
-@onready var title_label: Label = $Panel/VBox/TitleLabel
-@onready var stats_label: Label = $Panel/VBox/StatsLabel
-@onready var offers_container: VBoxContainer = $Panel/VBox/Scroll/OffersContainer
-@onready var new_offers_btn: Button = $Panel/VBox/NewOffersBtn
-@onready var close_btn: Button = $Panel/VBox/CloseBtn
-@onready var message_label: Label = $Panel/VBox/MessageLabel
+@onready var title_label: Label = $SellDialog/SellVBox/TitleLabel
+@onready var stats_label: Label = $SellDialog/SellVBox/StatsLabel
+@onready var offers_container: VBoxContainer = $SellDialog/SellVBox/Scroll/OffersContainer
+@onready var new_offers_btn: Button = $SellDialog/SellVBox/NewOffersBtn
+@onready var close_btn: Button = $SellDialog/SellVBox/CloseBtn
+@onready var message_label: Label = $SellDialog/SellVBox/MessageLabel
 
 var bike: Motorcycle = null
 var bike_index: int = -1
@@ -51,9 +50,9 @@ func _generate_offers() -> void:
 	if GameManager.reputation > 0.6:
 		count = max(count, 2)
 	for i in count:
-		var name: String = BUYER_NAMES[randi() % BUYER_NAMES.size()]
+		var buyer_name: String = BUYER_NAMES[randi() % BUYER_NAMES.size()]
 		var offer_price: int = int(real * randf_range(0.75, 1.2 + 0.1 * GameManager.reputation))
-		offers.append({"name": name, "price": offer_price})
+		offers.append({"buyer_name": buyer_name, "price": offer_price})
 		offers_container.add_child(_make_offer_row(i))
 
 
@@ -62,7 +61,7 @@ func _make_offer_row(idx: int) -> HBoxContainer:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	var lbl := Label.new()
-	lbl.text = "%s предлагает [b]%d ₽[/b]" % [data["name"], data["price"]]
+	lbl.text = "%s предлагает [b]%d ₽[/b]" % [data["buyer_name"], data["price"]]
 	lbl.bbcode_enabled = true
 	lbl.add_theme_font_size_override("font_size", 18)
 	lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -87,10 +86,12 @@ func _make_offer_row(idx: int) -> HBoxContainer:
 
 
 func _on_accept(idx: int) -> void:
+	if idx < 0 or idx >= offers.size():
+		return
 	var price: int = offers[idx]["price"]
 	GameManager.add_money(price)
 	var delta_rep: float = 0.02
-	if price > bike.calc_real_value() * 1.1:
+	if price > int(bike.calc_real_value() * 1.1):
 		delta_rep += 0.01
 	GameManager.add_reputation(delta_rep)
 	GameManager.remove_from_garage(bike)
@@ -107,7 +108,7 @@ func _on_haggle(idx: int) -> void:
 	var chance: float = 0.5 + 0.2 * GameManager.reputation
 	if randf() < chance:
 		var increase: float = randf_range(0.1, 0.2)
-		var new_price: int = int(old_price * (1.0 + increase))
+		var new_price: int = int(float(old_price) * (1.0 + increase))
 		offers[idx]["price"] = new_price
 		message_label.text = "[color=green]Покупатель согласился поднять цену до %d ₽![/color]" % new_price
 	else:
@@ -115,7 +116,7 @@ func _on_haggle(idx: int) -> void:
 			offers.remove_at(idx)
 			message_label.text = "[color=red]Покупатель отказался торговаться и ушёл.[/color]"
 		else:
-			var new_price: int = int(old_price * 0.9)
+			var new_price: int = int(float(old_price) * 0.9)
 			offers[idx]["price"] = new_price
 			message_label.text = "[color=yellow]Покупатель настаивает на цене %d ₽ (сбил на 10%%).[/color]" % new_price
 	message_label.bbcode_enabled = true

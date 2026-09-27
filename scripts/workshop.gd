@@ -1,14 +1,14 @@
 extends Control
 ## Workshop — меню ремонта и тюнинга мотоцикла.
 
-@onready var title_label: Label = $Panel/VBox/TitleLabel
-@onready var stats_label: Label = $Panel/VBox/StatsLabel
-@onready var repair_btn: Button = $Panel/VBox/Actions/RepairBtn
-@onready var exhaust_btn: Button = $Panel/VBox/Actions/ExhaustBtn
-@onready var suspension_btn: Button = $Panel/VBox/Actions/SuspensionBtn
-@onready var paint_grid: GridContainer = $Panel/VBox/PaintGrid
-@onready var close_btn: Button = $Panel/VBox/CloseBtn
-@onready var message_label: Label = $Panel/VBox/MessageLabel
+@onready var title_label: Label = $WorkshopDialog/WorkshopVBox/TitleLabel
+@onready var stats_label: Label = $WorkshopDialog/WorkshopVBox/StatsLabel
+@onready var repair_btn: Button = $WorkshopDialog/WorkshopVBox/Actions/RepairBtn
+@onready var exhaust_btn: Button = $WorkshopDialog/WorkshopVBox/Actions/ExhaustBtn
+@onready var suspension_btn: Button = $WorkshopDialog/WorkshopVBox/Actions/SuspensionBtn
+@onready var paint_grid: GridContainer = $WorkshopDialog/WorkshopVBox/PaintGrid
+@onready var close_btn: Button = $WorkshopDialog/WorkshopVBox/CloseBtn
+@onready var message_label: Label = $WorkshopDialog/WorkshopVBox/MessageLabel
 
 var bike: Motorcycle = null
 var bike_index: int = -1
@@ -73,7 +73,7 @@ func _build_stats_text() -> String:
 		tuned.append("подвеска")
 	if bike.painted:
 		tuned.append("покраска")
-	var tuned_str: String = ", ".join(tuned) if not tuned.is_empty() else "нет"
+	var tuned_str: String = ", ".join(tuned) if tuned.is_empty() == false else "нет"
 	return "Состояние: %d%%   •   Пробег: %d км   •   Мощность: %d л/с\nРеальная стоимость: %d ₽   •   Тюнинг: %s" % [
 		int(bike.condition), bike.mileage, bike.engine_hp, real_value, tuned_str
 	]
@@ -97,7 +97,8 @@ func _apply_result(result: Dictionary) -> void:
 		message_label.text = "[color=red]Недостаточно денег[/color]"
 		message_label.bbcode_enabled = true
 		return
-	for i in result.days:
+	var d_count: int = result.days
+	for i in d_count:
 		GameManager.next_day()
 	message_label.text = "[color=green]%s — потрачено %d ₽, прошло %d дн.[/color]" % [
 		result.msg, result.cost, result.days

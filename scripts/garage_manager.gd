@@ -43,10 +43,20 @@ func _ready() -> void:
 
 
 func _input(event: InputEvent) -> void:
-	# ЛКМ — рейкаст для выбора мотоцикла
+	# ЛКМ или тач — рейкаст для выбора мотоцикла
 	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		_pick_motorcycle(event.position)
-	# Вращение ПКМ + зум колесом
+		_dragging = true
+		_drag_last = event.position
+	elif event is InputEventMouseButton and not event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		_dragging = false
+	elif event is InputEventScreenTouch and event.pressed:
+		_pick_motorcycle(event.position)
+		_dragging = true
+		_drag_last = event.position
+	elif event is InputEventScreenTouch and not event.pressed:
+		_dragging = false
+	# Вращение ПКМ
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
 			_dragging = true
@@ -57,17 +67,45 @@ func _input(event: InputEvent) -> void:
 			_cam_distance = max(2.0, _cam_distance - 0.3)
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
 			_cam_distance = min(10.0, _cam_distance + 0.3)
+	# Тач-двумя пальцами — зум, одним — драг
+	if event is InputEventScreenDrag:
+		var delta: Vector2 = event.position - _drag_last
+		_drag_last = event.position
+		_cam_angle -= delta.x * 0.005
+		_cam_pitch = clamp(_cam_pitch - delta.y * 0.005, -0.2, 1.2)
+	# Мышью — поворот камеры
 	if event is InputEventMouseMotion and _dragging:
 		var delta: Vector2 = event.position - _drag_last
 		_drag_last = event.position
 		_cam_angle -= delta.x * 0.005
 		_cam_pitch = clamp(_cam_pitch - delta.y * 0.005, -0.2, 1.2)
+	# Клавиатура: WASD/стрелки — двигать камерой (имитация хотьбы)
+	if event is InputEventKey and event.pressed and not event.echo:
+		var move_speed: float = 1.2
+		if event.keycode == KEY_W or event.keycode == KEY_UP:
+			_cam_target += -transform.basis.z * move_speed
+		elif event.keycode == KEY_S or event.keycode == KEY_DOWN:
+			_cam_target += transform.basis.z * move_speed
+		elif event.keycode == KEY_A or event.keycode == KEY_LEFT:
+			_cam_target += -transform.basis.x * move_speed
+		elif event.keycode == KEY_D or event.keycode == KEY_RIGHT:
+			_cam_target += transform.basis.x * move_speed
+		elif event.keycode == KEY_ESCAPE:
+			# Сброс камеры в центр гаража
+			_selected_index = -1
+			interact_panel.visible = false
+			_cam_target = Vector3(0, 0.8, 0)
+			_refresh_ui()
 
 
 func _pick_motorcycle(mouse_pos: Vector2) -> void:
 	if camera == null:
 		return
+	# Ждём один кадр, чтобы физика успела обновиться
 	var space_state := get_world_3d().direct_space_state
+	var vp_size: Vector2 = get_viewport().get_visible_rect().size
+	if vp_size.x <= 0.0 or vp_size.y <= 0.0:
+		return
 	var from: Vector3 = camera.project_ray_origin(mouse_pos)
 	var to: Vector3 = from + camera.project_ray_normal(mouse_pos) * 50.0
 	var query := PhysicsRayQueryParameters3D.create(from, to)
@@ -204,8 +242,8 @@ func _build_garage_geometry() -> void:
 	env_data.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env_data.ambient_light_color = Color(0.55, 0.6, 0.65)
 	env_data.ambient_light_energy = 0.5
-	# TONE_MAPPING_ACES появился в 4.2+, в 4.0 используем TONE_MAPPING_FILMIC (1)
-	env_data.tonemap_mode = 1
+	# Явно приводим tonemap_mode через тип enum, чтобы не было ворнинга
+	env_data.tonemap_mode = Environment.ToneMapper(0)
 	env.environment = env_data
 	garage_root.add_child(env)
 

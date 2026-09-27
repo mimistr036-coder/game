@@ -1,8 +1,6 @@
 extends Control
-## Main — корневой узел главной сцены. Переключает экраны
-## (Рынок/Гараж/Мастерская/Продажа) и обновляет верхнюю/нижнюю панель.
-## Регистрируется в группе "ui_manager", чтобы другие скрипты могли
-## вызывать его методы через get_tree().get_first_node_in_group("ui_manager").
+## Main — корневой контроллер UI. Переключает экраны, подстраивает
+## SubViewport под реальный размер окна, обновляет TopBar/BottomBar.
 
 @onready var money_label: Label = $TopBar/MoneyLabel
 @onready var day_label: Label = $TopBar/DayLabel
@@ -16,6 +14,7 @@ extends Control
 @onready var market_panel: Control = $MarketPanel
 @onready var market_script: Node = $MarketPanel
 @onready var garage_viewport: SubViewportContainer = $GarageViewportContainer
+@onready var viewport: SubViewport = $GarageViewportContainer/SubViewport
 @onready var garage_script: Node = $GarageViewportContainer/SubViewport/Garage
 @onready var workshop_panel: Control = $WorkshopPanel
 @onready var workshop_script: Node = $WorkshopPanel
@@ -32,15 +31,27 @@ func _ready() -> void:
 	garage_btn.pressed.connect(show_garage)
 	expand_garage_btn.pressed.connect(_on_expand)
 	next_day_btn.pressed.connect(func(): GameManager.next_day())
-	$MarketPanel/Panel/VBox/CloseBtn.pressed.connect(show_garage)
+	$MarketPanel/MarketDialog/MarketVBox/CloseBtn.pressed.connect(show_garage)
 	if market_script.has_method("refresh"):
 		GameManager.market_changed.connect(market_script.refresh)
 		GameManager.money_changed.connect(market_script.refresh)
 	_on_money_changed(GameManager.money)
 	_on_day_changed(GameManager.day)
 	_on_rep_changed(GameManager.reputation)
+	# Подстраиваем размер 3D-viewport'а под окно
+	call_deferred("_update_viewport_size")
+	get_tree().root.size_changed.connect(_update_viewport_size)
 	await get_tree().process_frame
 	show_garage()
+
+
+func _update_viewport_size() -> void:
+	var s: Vector2i = get_viewport().get_visible_rect().size
+	if s.x < 320:
+		s.x = 320
+	if s.y < 240:
+		s.y = 240
+	viewport.size = s
 
 
 func _on_money_changed(v: int) -> void:

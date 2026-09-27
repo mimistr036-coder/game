@@ -1,8 +1,8 @@
 extends Control
 ## MarketUI — панель рынка со списком карточек предложений.
 
-@onready var list: VBoxContainer = $Panel/VBox/Scroll/List
-@onready var refresh_btn: Button = $Panel/VBox/RefreshBtn
+@onready var list: VBoxContainer = $MarketDialog/MarketVBox/Scroll/List
+@onready var refresh_btn: Button = $MarketDialog/MarketVBox/RefreshBtn
 
 
 func _ready() -> void:
@@ -49,12 +49,11 @@ func _make_card(bike: Motorcycle, index: int) -> PanelContainer:
 	else:
 		deal_hint = "[color=white]≈ Справедливая цена[/color]"
 	info.text = "Пробег: %d км   •   Состояние: %d%%   •   Мощность: %d л/с   •   Редкость: %d%%\nЗапрашивает продавец: [b]%d ₽[/b]   •   Реальная цена: ~%d ₽\n%s" % [
-			bike.mileage, int(bike.condition), bike.engine_hp, int(bike.rarity * 100),
+			bike.mileage, int(bike.condition), bike.engine_hp, int(bike.rarity * 100.0),
 			bike.price_sell, real, deal_hint
 		]
 	info.bbcode_enabled = true
-	# 3 = AUTOWRAP_WORD_SMART (совместимо с Godot 4.0)
-	info.autowrap_mode = 3
+	info.autowrap_mode = Label.AutowrapMode(3)
 	vbox.add_child(info)
 
 	var hbox := HBoxContainer.new()
