@@ -32,9 +32,21 @@ func _ready() -> void:
 	_build_slots_positions()
 	_build_garage_geometry()
 	GameManager.garage_changed.connect(_refresh_bikes)
-	GameManager.money_changed.connect(_refresh_ui)
-	GameManager.day_changed.connect(_refresh_ui)
-	GameManager.reputation_changed.connect(_refresh_ui)
+	GameManager.money_changed.connect(_on_money_changed)
+	GameManager.day_changed.connect(_on_day_changed)
+	GameManager.reputation_changed.connect(_on_rep_changed)
+
+
+func _on_money_changed(_new_amount = null) -> void:
+	_refresh_ui()
+
+
+func _on_day_changed(_new_day = null) -> void:
+	_refresh_ui()
+
+
+func _on_rep_changed(_new_rep = null) -> void:
+	_refresh_ui()
 	send_workshop_btn.pressed.connect(_on_send_workshop)
 	send_sell_btn.pressed.connect(_on_send_sell)
 	interact_panel.visible = false

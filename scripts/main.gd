@@ -38,18 +38,23 @@ func _ready() -> void:
 	_on_money_changed(GameManager.money)
 	_on_day_changed(GameManager.day)
 	_on_rep_changed(GameManager.reputation)
-	call_deferred("_update_viewport_size")
-	get_tree().root.size_changed.connect(_update_viewport_size)
+	# Размер SubViewport автоматически подстраивается через stretch=true
 	await get_tree().process_frame
 	show_garage()
 
 
 func _connect_market_signals() -> void:
 	if market_script and market_script.has_method("refresh"):
-		if not GameManager.market_changed.is_connected(market_script.refresh):
-			GameManager.market_changed.connect(market_script.refresh)
-		if not GameManager.money_changed.is_connected(market_script.refresh):
-			GameManager.money_changed.connect(market_script.refresh)
+		# Оборачиваем в лямбду, чтобы signal-параметры (int) не передавались в refresh()
+		if not GameManager.market_changed.is_connected(_on_market_invalidated):
+			GameManager.market_changed.connect(_on_market_invalidated)
+		if not GameManager.money_changed.is_connected(_on_market_invalidated):
+			GameManager.money_changed.connect(_on_market_invalidated)
+
+
+func _on_market_invalidated(_arg = null) -> void:
+	if market_script and market_script.has_method("refresh"):
+		market_script.call_deferred("refresh")
 
 
 func _on_next_day() -> void:
@@ -70,20 +75,14 @@ func _bring_to_front(panel: Control) -> void:
 	parent.add_child(panel)
 
 
-func _update_viewport_size() -> void:
-	if not is_instance_valid(viewport):
-		return
-	var s: Vector2i = get_viewport().get_visible_rect().size
-	if s.x < 320:
-		s.x = 320
-	if s.y < 240:
-		s.y = 240
-	viewport.size = s
+# (удалён _update_viewport_size т.к. stretch=true сам управляет размером)
 
 
 func _on_money_changed(v: int) -> void:
 	if is_instance_valid(money_label):
 		money_label.text = "Баланс: %d ₽" % v
+	# Также вызываем обновление market UI (через лямбду)
+	_on_market_invalidated()
 
 
 func _on_day_changed(v: int) -> void:
