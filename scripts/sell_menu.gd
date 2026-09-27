@@ -31,6 +31,9 @@ func show_for(bike_idx: int) -> void:
 	if bike == null:
 		visible = false
 		return
+	if not is_instance_valid(title_label) or not is_instance_valid(offers_container):
+		call_deferred("show_for", bike_idx)
+		return
 	visible = true
 	message_label.text = ""
 	title_label.text = "Продажа: %s" % bike.get_full_name()

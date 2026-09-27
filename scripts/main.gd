@@ -30,22 +30,40 @@ func _ready() -> void:
 	market_btn.pressed.connect(show_market)
 	garage_btn.pressed.connect(show_garage)
 	expand_garage_btn.pressed.connect(_on_expand)
-	next_day_btn.pressed.connect(func(): GameManager.next_day())
-	$MarketPanel/MarketDialog/MarketVBox/CloseBtn.pressed.connect(show_garage)
-	if market_script.has_method("refresh"):
-		GameManager.market_changed.connect(market_script.refresh)
-		GameManager.money_changed.connect(market_script.refresh)
+	next_day_btn.pressed.connect(_on_next_day)
+	# Подключаем кнопку закрытия рынка только после того, как узел точно существует
+	var close_btn_path: NodePath = "MarketPanel/MarketDialog/MarketVBox/CloseBtn"
+	if has_node(close_btn_path):
+		get_node(close_btn_path).pressed.connect(show_garage)
+	# Отложенно подключаем сигналы market_changed, чтобы UI успел инициализироваться
+	call_deferred("_connect_market_signals")
 	_on_money_changed(GameManager.money)
 	_on_day_changed(GameManager.day)
 	_on_rep_changed(GameManager.reputation)
-	# Подстраиваем размер 3D-viewport'а под окно
 	call_deferred("_update_viewport_size")
 	get_tree().root.size_changed.connect(_update_viewport_size)
 	await get_tree().process_frame
 	show_garage()
 
 
+func _connect_market_signals() -> void:
+	if market_script and market_script.has_method("refresh"):
+		if not GameManager.market_changed.is_connected(market_script.refresh):
+			GameManager.market_changed.connect(market_script.refresh)
+		if not GameManager.money_changed.is_connected(market_script.refresh):
+			GameManager.money_changed.connect(market_script.refresh)
+
+
+func _on_next_day() -> void:
+	# Перед перемоткой дня сбрасываем любое открытое меню (защита от вылета)
+	_hide_all()
+	garage_viewport.visible = true
+	GameManager.next_day()
+
+
 func _update_viewport_size() -> void:
+	if not is_instance_valid(viewport):
+		return
 	var s: Vector2i = get_viewport().get_visible_rect().size
 	if s.x < 320:
 		s.x = 320
@@ -55,30 +73,37 @@ func _update_viewport_size() -> void:
 
 
 func _on_money_changed(v: int) -> void:
-	money_label.text = "Баланс: %d ₽" % v
+	if is_instance_valid(money_label):
+		money_label.text = "Баланс: %d ₽" % v
 
 
 func _on_day_changed(v: int) -> void:
-	day_label.text = "День: %d" % v
+	if is_instance_valid(day_label):
+		day_label.text = "День: %d" % v
 
 
 func _on_rep_changed(v: float) -> void:
-	rep_label.text = "Репутация: %d%%" % int(v * 100.0)
+	if is_instance_valid(rep_label):
+		rep_label.text = "Репутация: %d%%" % int(v * 100.0)
 
 
 func _hide_all() -> void:
-	market_panel.visible = false
-	workshop_panel.visible = false
-	sell_panel.visible = false
+	if is_instance_valid(market_panel):
+		market_panel.visible = false
+	if is_instance_valid(workshop_panel):
+		workshop_panel.visible = false
+	if is_instance_valid(sell_panel):
+		sell_panel.visible = false
 
 
 func show_market() -> void:
 	_hide_all()
 	garage_viewport.visible = true
 	market_panel.visible = true
-	market_panel.raise()
-	if market_script.has_method("refresh"):
-		market_script.refresh()
+	if is_instance_valid(market_panel):
+		market_panel.raise()
+	if market_script and market_script.has_method("refresh"):
+		market_script.call_deferred("refresh")
 
 
 func show_garage() -> void:
@@ -91,7 +116,7 @@ func show_workshop(bike_index: int) -> void:
 	garage_viewport.visible = true
 	workshop_panel.visible = true
 	workshop_panel.raise()
-	if workshop_script.has_method("show_for"):
+	if workshop_script and workshop_script.has_method("show_for"):
 		workshop_script.show_for(bike_index)
 
 
@@ -100,13 +125,13 @@ func show_sell_menu(bike_index: int) -> void:
 	garage_viewport.visible = true
 	sell_panel.visible = true
 	sell_panel.raise()
-	if sell_script.has_method("show_for"):
+	if sell_script and sell_script.has_method("show_for"):
 		sell_script.show_for(bike_index)
 
 
 func refresh_garage_bike(_index: int) -> void:
 	if garage_script and garage_script.has_method("_refresh_bikes"):
-		garage_script._refresh_bikes()
+		garage_script.call_deferred("_refresh_bikes")
 
 
 func _on_expand() -> void:

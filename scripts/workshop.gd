@@ -48,6 +48,10 @@ func show_for(bike_idx: int) -> void:
 	if bike == null:
 		visible = false
 		return
+	if not is_instance_valid(title_label) or not is_instance_valid(stats_label) or not is_instance_valid(repair_btn):
+		# Узлы ещё не готовы — откладываем на следующий кадр
+		call_deferred("show_for", bike_idx)
+		return
 	visible = true
 	message_label.text = ""
 	_refresh()

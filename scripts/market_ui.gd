@@ -4,9 +4,12 @@ extends Control
 @onready var list: VBoxContainer = $MarketDialog/MarketVBox/Scroll/List
 @onready var refresh_btn: Button = $MarketDialog/MarketVBox/RefreshBtn
 
+var _ready_called: bool = false
+
 
 func _ready() -> void:
 	refresh_btn.pressed.connect(_on_refresh)
+	_ready_called = true
 
 
 func _on_refresh() -> void:
@@ -14,6 +17,8 @@ func _on_refresh() -> void:
 
 
 func refresh() -> void:
+	if not _ready_called or not is_instance_valid(list):
+		return
 	for c in list.get_children():
 		c.queue_free()
 	for i in GameManager.market_offers.size():
@@ -53,7 +58,8 @@ func _make_card(bike: Motorcycle, index: int) -> PanelContainer:
 			bike.price_sell, real, deal_hint
 		]
 	info.bbcode_enabled = true
-	info.autowrap_mode = 3
+	# AUTOWRAP_WORD_SMART = 3 — ставим напрямую, как в .tscn (не вызывает ошибок в сцене)
+	info.set("autowrap_mode", 3)
 	vbox.add_child(info)
 
 	var hbox := HBoxContainer.new()

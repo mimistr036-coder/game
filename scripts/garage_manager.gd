@@ -139,7 +139,7 @@ func _build_slots_positions() -> void:
 	var start_x: float = -4.0
 	var spacing: float = 2.0
 	for i in SLOTS_MAX_VISUAL:
-		var row: int = int(i / 5)
+		var row: int = int(float(i) / 5.0)
 		var col: int = i % 5
 		var pos := Vector3(start_x + col * spacing, 0.05, -3.5 + row * 2.5)
 		_slots_positions.append(pos)
@@ -242,7 +242,7 @@ func _build_garage_geometry() -> void:
 	env_data.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env_data.ambient_light_color = Color(0.55, 0.6, 0.65)
 	env_data.ambient_light_energy = 0.5
-	env_data.tonemap_mode = 0
+	env_data.set("tonemap_mode", 0)
 	env.environment = env_data
 	garage_root.add_child(env)
 
