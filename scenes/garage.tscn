@@ -1,0 +1,72 @@
+[gd_scene load_steps=2 format=3 uid="uid://b3dcgarage0000001"]
+
+[ext_resource type="Script" path="res://scripts/garage_manager.gd" id="1_script"]
+
+[node name="Garage" type="Node3D"]
+script = ExtResource("1_script")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+position = Vector3(3, 2.5, 4)
+current = true
+fov = 60.0
+
+[node name="GarageGeometry" type="Node3D" parent="."]
+
+[node name="BikesAnchor" type="Node3D" parent="."]
+
+[node name="UIRoot" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SlotInfoLabel" type="Label" parent="UIRoot"]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -480.0
+offset_top = -80.0
+offset_right = -20.0
+offset_bottom = -55.0
+horizontal_alignment = 2
+text = "Гараж: 0/5"
+theme_override_font_sizes/font_size = 16
+
+[node name="SelectedLabel" type="Label" parent="UIRoot"]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -480.0
+offset_top = -55.0
+offset_right = -20.0
+offset_bottom = -30.0
+horizontal_alignment = 2
+text = "Кликните по мотоциклу"
+theme_override_font_sizes/font_size = 18
+
+[node name="InteractPanel" type="PanelContainer" parent="UIRoot"]
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -320.0
+offset_top = -200.0
+offset_right = -20.0
+offset_bottom = -20.0
+
+[node name="VBox" type="VBoxContainer" parent="UIRoot/InteractPanel"]
+theme_override_constants/separation = 6
+
+[node name="Label" type="Label" parent="UIRoot/InteractPanel/VBox"]
+text = "Что сделать с мотоциклом?"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 16
+
+[node name="SendWorkshopBtn" type="Button" parent="UIRoot/InteractPanel/VBox"]
+text = "Отправить в мастерскую"
+
+[node name="SendSellBtn" type="Button" parent="UIRoot/InteractPanel/VBox"]
+text = "Выставить на продажу"

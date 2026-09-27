@@ -1,0 +1,240 @@
+[gd_scene load_steps=6 format=3 uid="uid://b3dcmain00000001"]
+
+[ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="Script" path="res://scripts/market_ui.gd" id="2_market"]
+[ext_resource type="Script" path="res://scripts/workshop.gd" id="3_workshop"]
+[ext_resource type="Script" path="res://scripts/sell_menu.gd" id="4_sell"]
+[ext_resource type="PackedScene" path="res://scenes/garage.tscn" id="5_garage"]
+
+[node name="Main" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main")
+
+[node name="GarageViewportContainer" type="SubViewportContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="GarageViewportContainer"]
+size = Vector2i(1200, 800)
+render_target_update_mode = 3
+physics_object_picking = true
+handle_input_locally = true
+
+[node name="Garage" parent="GarageViewportContainer/SubViewport" instance=ExtResource("5_garage")]
+
+[node name="TopBar" type="HBoxContainer" parent="."]
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 600.0
+offset_bottom = 45.0
+theme_override_constants/separation = 24
+
+[node name="MoneyLabel" type="Label" parent="TopBar"]
+text = "Баланс: 50000 ₽"
+theme_override_font_sizes/font_size = 22
+
+[node name="DayLabel" type="Label" parent="TopBar"]
+text = "День: 1"
+theme_override_font_sizes/font_size = 22
+
+[node name="RepLabel" type="Label" parent="TopBar"]
+text = "Репутация: 50%"
+theme_override_font_sizes/font_size = 22
+
+[node name="BottomBar" type="HBoxContainer" parent="."]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = -55.0
+offset_right = -10.0
+offset_bottom = -10.0
+theme_override_constants/separation = 10
+
+[node name="MarketBtn" type="Button" parent="BottomBar"]
+custom_minimum_size = Vector2(140, 40)
+text = "🛒 Рынок"
+
+[node name="GarageBtn" type="Button" parent="BottomBar"]
+custom_minimum_size = Vector2(140, 40)
+text = "🏠 Гараж"
+
+[node name="ExpandBtn" type="Button" parent="BottomBar"]
+custom_minimum_size = Vector2(240, 40)
+text = "🔧 Расширить гараж (+1 слот, 30 000 ₽)"
+
+[node name="NextDayBtn" type="Button" parent="BottomBar"]
+custom_minimum_size = Vector2(160, 40)
+text = "⏭ Новый день"
+
+[node name="MarketPanel" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+visible = false
+script = ExtResource("2_market")
+
+[node name="Bg" type="ColorRect" parent="MarketPanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.7)
+mouse_filter = 1
+
+[node name="Panel" type="PanelContainer" parent="MarketPanel"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -420.0
+offset_top = -320.0
+offset_right = 420.0
+offset_bottom = 320.0
+
+[node name="VBox" type="VBoxContainer" parent="MarketPanel/Panel"]
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="MarketPanel/Panel/VBox"]
+text = "🛒 Рынок мотоциклов — предложения на сегодня"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 22
+
+[node name="Scroll" type="ScrollContainer" parent="MarketPanel/Panel/VBox"]
+size_flags_vertical = 3
+
+[node name="List" type="VBoxContainer" parent="MarketPanel/Panel/VBox/Scroll"]
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="RefreshBtn" type="Button" parent="MarketPanel/Panel/VBox"]
+custom_minimum_size = Vector2(0, 40)
+text = "⏭ Новый день (обновить предложения)"
+
+[node name="CloseBtn" type="Button" parent="MarketPanel/Panel/VBox"]
+custom_minimum_size = Vector2(0, 35)
+text = "Закрыть (вернуться в гараж)"
+
+[node name="WorkshopPanel" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+visible = false
+script = ExtResource("3_workshop")
+
+[node name="Bg" type="ColorRect" parent="WorkshopPanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.7)
+mouse_filter = 1
+
+[node name="Panel" type="PanelContainer" parent="WorkshopPanel"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -400.0
+offset_top = -300.0
+offset_right = 400.0
+offset_bottom = 300.0
+
+[node name="VBox" type="VBoxContainer" parent="WorkshopPanel/Panel"]
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="WorkshopPanel/Panel/VBox"]
+text = "Мастерская"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 22
+
+[node name="StatsLabel" type="Label" parent="WorkshopPanel/Panel/VBox"]
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
+
+[node name="Actions" type="VBoxContainer" parent="WorkshopPanel/Panel/VBox"]
+theme_override_constants/separation = 6
+
+[node name="RepairBtn" type="Button" parent="WorkshopPanel/Panel/VBox/Actions"]
+custom_minimum_size = Vector2(0, 36)
+text = "Ремонт двигателя"
+
+[node name="ExhaustBtn" type="Button" parent="WorkshopPanel/Panel/VBox/Actions"]
+custom_minimum_size = Vector2(0, 36)
+text = "Тюнинг выхлопа"
+
+[node name="SuspensionBtn" type="Button" parent="WorkshopPanel/Panel/VBox/Actions"]
+custom_minimum_size = Vector2(0, 36)
+text = "Тюнинг подвески"
+
+[node name="PaintLabel" type="Label" parent="WorkshopPanel/Panel/VBox"]
+text = "Покраска (5000 ₽, 1 день):"
+theme_override_font_sizes/font_size = 15
+
+[node name="PaintGrid" type="GridContainer" parent="WorkshopPanel/Panel/VBox"]
+columns = 8
+theme_override_constants/h_separation = 6
+theme_override_constants/v_separation = 6
+
+[node name="MessageLabel" type="Label" parent="WorkshopPanel/Panel/VBox"]
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 15
+
+[node name="CloseBtn" type="Button" parent="WorkshopPanel/Panel/VBox"]
+custom_minimum_size = Vector2(0, 36)
+text = "Закрыть"
+
+[node name="SellPanel" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+visible = false
+script = ExtResource("4_sell")
+
+[node name="Bg" type="ColorRect" parent="SellPanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.7)
+mouse_filter = 1
+
+[node name="Panel" type="PanelContainer" parent="SellPanel"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -420.0
+offset_top = -300.0
+offset_right = 420.0
+offset_bottom = 300.0
+
+[node name="VBox" type="VBoxContainer" parent="SellPanel/Panel"]
+theme_override_constants/separation = 8
+
+[node name="TitleLabel" type="Label" parent="SellPanel/Panel/VBox"]
+text = "Продажа мотоцикла"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 22
+
+[node name="StatsLabel" type="Label" parent="SellPanel/Panel/VBox"]
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 16
+
+[node name="OffersLabel" type="Label" parent="SellPanel/Panel/VBox"]
+text = "Покупатели:"
+theme_override_font_sizes/font_size = 16
+
+[node name="Scroll" type="ScrollContainer" parent="SellPanel/Panel/VBox"]
+size_flags_vertical = 3
+
+[node name="OffersContainer" type="VBoxContainer" parent="SellPanel/Panel/VBox/Scroll"]
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="NewOffersBtn" type="Button" parent="SellPanel/Panel/VBox"]
+custom_minimum_size = Vector2(0, 36)
+text = "🔄 Новые покупатели (проходит 1 день)"
+
+[node name="MessageLabel" type="Label" parent="SellPanel/Panel/VBox"]
+autowrap_mode = 3
+theme_override_font_sizes/font_size = 15
+
+[node name="CloseBtn" type="Button" parent="SellPanel/Panel/VBox"]
+custom_minimum_size = Vector2(0, 36)
+text = "Отложить продажу"
