@@ -1,7 +1,5 @@
 extends Control
-## Workshop — меню ремонта и тюнинга.
-## Принимает индекс мотоцикла в гараже, выполняет действия, берёт деньги,
-## накидывает дни, обновляет визуал и вызывает возврат в гараж.
+## Workshop — меню ремонта и тюнинга мотоцикла.
 
 @onready var title_label: Label = $Panel/VBox/TitleLabel
 @onready var stats_label: Label = $Panel/VBox/StatsLabel
@@ -22,23 +20,16 @@ func _ready() -> void:
 	exhaust_btn.pressed.connect(_on_exhaust)
 	suspension_btn.pressed.connect(_on_suspension)
 	close_btn.pressed.connect(_on_close)
-	# Создаём кнопки цветов покраски
 	for c in Motorcycle.PAINT_COLORS:
 		var btn := Button.new()
 		btn.custom_minimum_size = Vector2(40, 40)
 		var sb := StyleBoxFlat.new()
 		sb.bg_color = c
-		sb.corner_radius_top_left = 4
-		sb.corner_radius_top_right = 4
-		sb.corner_radius_bottom_left = 4
-		sb.corner_radius_bottom_right = 4
-		sb.border_width_left = 2
-		sb.border_width_right = 2
-		sb.border_width_top = 2
-		sb.border_width_bottom = 2
+		sb.set_corner_radius_all(4)
+		sb.set_border_width_all(2)
 		sb.border_color = Color(0.1, 0.1, 0.1)
 		btn.add_theme_stylebox_override("normal", sb)
-		var hover := sb.duplicate()
+		var hover: StyleBoxFlat = sb.duplicate() as StyleBoxFlat
 		hover.border_color = Color(1, 1, 1)
 		btn.add_theme_stylebox_override("hover", hover)
 		paint_grid.add_child(btn)
@@ -60,6 +51,7 @@ func _refresh() -> void:
 	title_label.text = "Мастерская — %s" % bike.get_full_name()
 	stats_label.text = _build_stats_text()
 	repair_btn.text = _build_repair_text()
+	repair_btn.disabled = bike.condition >= 100.0 or GameManager.money < int((100.0 - bike.condition) * 200.0)
 	exhaust_btn.text = "Тюнинг выхлопа (+15 л/с) — 20 000 ₽, 2 дня"
 	exhaust_btn.disabled = bike.exhaust_tuned or GameManager.money < 20000
 	suspension_btn.text = "Тюнинг подвески — 12 000 ₽, 1 день"
@@ -68,11 +60,14 @@ func _refresh() -> void:
 
 func _build_stats_text() -> String:
 	var real_value: int = bike.calc_real_value()
-	var tuned: Array[String] = []
-	if bike.exhaust_tuned: tuned.append("выхлоп")
-	if bike.suspension_tuned: tuned.append("подвеска")
-	if bike.painted: tuned.append("покраска")
-	var tuned_str: String = ", ".join(tuned) if tuned.size() > 0 else "нет"
+	var tuned: Array = []
+	if bike.exhaust_tuned:
+		tuned.append("выхлоп")
+	if bike.suspension_tuned:
+		tuned.append("подвеска")
+	if bike.painted:
+		tuned.append("покраска")
+	var tuned_str: String = ", ".join(tuned) if not tuned.is_empty() else "нет"
 	return "Состояние: %d%%   •   Пробег: %d км   •   Мощность: %d л/с\nРеальная стоимость: %d ₽   •   Тюнинг: %s" % [
 		int(bike.condition), bike.mileage, bike.engine_hp, real_value, tuned_str
 	]
@@ -90,18 +85,21 @@ func _build_repair_text() -> String:
 func _apply_result(result: Dictionary) -> void:
 	if not result.success:
 		message_label.text = "[color=yellow]%s[/color]" % result.msg
+		message_label.bbcode_enabled = true
 		return
 	if not GameManager.spend_money(result.cost):
 		message_label.text = "[color=red]Недостаточно денег[/color]"
+		message_label.bbcode_enabled = true
 		return
 	for i in result.days:
 		GameManager.next_day()
 	message_label.text = "[color=green]%s — потрачено %d ₽, прошло %d дн.[/color]" % [
 		result.msg, result.cost, result.days
 	]
-	# Обновляем 3D-визуал мотоцикла
+	message_label.bbcode_enabled = true
 	var ui := get_tree().get_first_node_in_group("ui_manager")
-	if ui: ui.refresh_garage_bike(bike_index)
+	if ui:
+		ui.call("refresh_garage_bike", bike_index)
 	_refresh()
 
 
@@ -124,4 +122,5 @@ func _on_paint(color: Color) -> void:
 func _on_close() -> void:
 	visible = false
 	var ui := get_tree().get_first_node_in_group("ui_manager")
-	if ui: ui.show_garage()
+	if ui:
+		ui.call("show_garage")

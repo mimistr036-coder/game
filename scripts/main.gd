@@ -1,8 +1,8 @@
 extends Control
-## Main — корневой узел главной сцены. Управляет переключением экранов
-## (Рынок / Гараж / Мастерская / Продажа), обновляет верхнюю и нижнюю панели.
-## Регистрирует себя в группе "ui_manager", чтобы другие скрипты могли вызывать
-## его методы через get_tree().get_first_node_in_group("ui_manager").
+## Main — корневой узел главной сцены. Переключает экраны
+## (Рынок/Гараж/Мастерская/Продажа) и обновляет верхнюю/нижнюю панель.
+## Регистрируется в группе "ui_manager", чтобы другие скрипты могли
+## вызывать его методы через get_tree().get_first_node_in_group("ui_manager").
 
 @onready var money_label: Label = $TopBar/MoneyLabel
 @onready var day_label: Label = $TopBar/DayLabel
@@ -39,7 +39,6 @@ func _ready() -> void:
 	_on_money_changed(GameManager.money)
 	_on_day_changed(GameManager.day)
 	_on_rep_changed(GameManager.reputation)
-	# После загрузки всего — показываем гараж
 	await get_tree().process_frame
 	show_garage()
 
@@ -58,16 +57,14 @@ func _on_rep_changed(v: float) -> void:
 
 func _hide_all() -> void:
 	market_panel.visible = false
-	garage_viewport.visible = false
 	workshop_panel.visible = false
 	sell_panel.visible = false
 
 
 func show_market() -> void:
 	_hide_all()
-	market_panel.visible = true
-	# 3D гараж продолжает рендериться в фоне для красоты
 	garage_viewport.visible = true
+	market_panel.visible = true
 	market_panel.move_to_front()
 	if market_script.has_method("refresh"):
 		market_script.refresh()
@@ -83,7 +80,8 @@ func show_workshop(bike_index: int) -> void:
 	garage_viewport.visible = true
 	workshop_panel.visible = true
 	workshop_panel.move_to_front()
-	workshop_script.show_for(bike_index)
+	if workshop_script.has_method("show_for"):
+		workshop_script.show_for(bike_index)
 
 
 func show_sell_menu(bike_index: int) -> void:
@@ -91,7 +89,8 @@ func show_sell_menu(bike_index: int) -> void:
 	garage_viewport.visible = true
 	sell_panel.visible = true
 	sell_panel.move_to_front()
-	sell_script.show_for(bike_index)
+	if sell_script.has_method("show_for"):
+		sell_script.show_for(bike_index)
 
 
 func refresh_garage_bike(_index: int) -> void:

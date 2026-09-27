@@ -1,23 +1,24 @@
 extends Control
-## MarketUI — панель рынка с карточками предложений.
+## MarketUI — панель рынка со списком карточек предложений.
 
-@onready var list: VBoxContainer = $Panel/VBox/List
+@onready var list: VBoxContainer = $Panel/VBox/Scroll/List
 @onready var refresh_btn: Button = $Panel/VBox/RefreshBtn
 
 
 func _ready() -> void:
-	refresh_btn.pressed.connect(func(): GameManager.refresh_market())
+	refresh_btn.pressed.connect(_on_refresh)
+
+
+func _on_refresh() -> void:
+	GameManager.refresh_market()
 
 
 func refresh() -> void:
-	# Удаляем старые карточки
 	for c in list.get_children():
 		c.queue_free()
 	for i in GameManager.market_offers.size():
 		var bike: Motorcycle = GameManager.market_offers[i]
-		var card = _make_card(bike, i)
-		list.add_child(card)
-	# Если предложений нет — показываем заглушку
+		list.add_child(_make_card(bike, i))
 	if GameManager.market_offers.is_empty():
 		var l := Label.new()
 		l.text = "На рынке сегодня пусто. Нажмите «Новый день»."
@@ -38,9 +39,9 @@ func _make_card(bike: Motorcycle, index: int) -> PanelContainer:
 	vbox.add_child(title)
 
 	var info := Label.new()
-	var deal_hint: String
 	var real: int = bike.calc_real_value()
 	var diff: int = bike.price_sell - real
+	var deal_hint: String
 	if diff < -1000:
 		deal_hint = "[color=#5cff7a]▼ Выгодно! Ниже реальной цены[/color]"
 	elif diff > 5000:
@@ -62,10 +63,9 @@ func _make_card(bike: Motorcycle, index: int) -> PanelContainer:
 	var buy_btn := Button.new()
 	buy_btn.text = "Купить (%d ₽)" % bike.price_sell
 	buy_btn.disabled = GameManager.money < bike.price_sell or GameManager.garage.size() >= GameManager.garage_slots
-	buy_btn.pressed.connect(func(): _buy(index))
+	buy_btn.pressed.connect(_on_buy.bind(index))
 	hbox.add_child(buy_btn)
 
-	# "Индикатор" цвета кузова — маленький цветной квадрат
 	var color_box := ColorRect.new()
 	color_box.color = bike.get_condition_color()
 	color_box.custom_minimum_size = Vector2(40, 28)
@@ -74,7 +74,7 @@ func _make_card(bike: Motorcycle, index: int) -> PanelContainer:
 	return card
 
 
-func _buy(index: int) -> void:
+func _on_buy(index: int) -> void:
 	if GameManager.buy_from_market(index):
-		GameManager.add_reputation(0.01)  # за каждую сделку +1%
+		GameManager.add_reputation(0.01)
 		refresh()

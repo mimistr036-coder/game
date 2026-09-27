@@ -1,7 +1,7 @@
 extends Node
 ## GameManager — глобальный синглтон (автозагрузка).
-## Хранит деньги, день, репутацию, список мотоциклов в гараже и список
-## текущих предложений на рынке. Оповещает UI через сигналы.
+## Деньги, день, репутация, список мотоциклов в гараже и текущие
+## предложения рынка. Оповещает UI сигналами.
 
 signal money_changed(new_amount: int)
 signal day_changed(new_day: int)
@@ -9,24 +9,22 @@ signal reputation_changed(new_rep: float)
 signal garage_changed()
 signal market_changed()
 
-const STARTING_MONEY: int = 50000            # Стартовый капитал, ₽
-const STARTING_REPUTATION: float = 0.5       # Репутация от 0 до 1
-const STARTING_GARAGE_SLOTS: int = 5         # Базовое число слотов в гараже
-const SLOT_UPGRADE_COST: int = 30000         # Стоимость расширения гаража на +1 слот
-const DAY_DURATION_SEC: float = 30.0         # Длительность игрового дня в секундах (для автопереключения)
+const STARTING_MONEY: int = 50000
+const STARTING_REPUTATION: float = 0.5
+const STARTING_GARAGE_SLOTS: int = 5
+const SLOT_UPGRADE_COST: int = 30000
+const DAY_DURATION_SEC: float = 30.0
 
 var money: int = STARTING_MONEY
 var day: int = 1
 var reputation: float = STARTING_REPUTATION
 var garage_slots: int = STARTING_GARAGE_SLOTS
 
-# Мотоциклы в гараже (объекты Motorcycle)
-var garage: Array = []
-# Текущие предложения на рынке (объекты Motorcycle)
-var market_offers: Array = []
+var garage: Array = []           # объекты Motorcycle
+var market_offers: Array = []    # объекты Motorcycle
 
 var _day_timer: float = 0.0
-var _auto_advance: bool = false  # Авто-перемотка дней по таймеру (по желанию можно включить)
+var _auto_advance: bool = false
 
 
 func _ready() -> void:
@@ -43,7 +41,7 @@ func _process(delta: float) -> void:
 		next_day()
 
 
-## --- Деньги -----------------------------------------------------------------
+# --- Деньги -----------------------------------------------------------------
 
 func add_money(amount: int) -> void:
 	money += amount
@@ -51,7 +49,6 @@ func add_money(amount: int) -> void:
 
 
 func spend_money(amount: int) -> bool:
-	"""Возвращает true если удалось потратить деньги."""
 	if money < amount:
 		return false
 	money -= amount
@@ -59,24 +56,24 @@ func spend_money(amount: int) -> bool:
 	return true
 
 
-## --- Дни --------------------------------------------------------------------
+# --- Дни --------------------------------------------------------------------
 
 func next_day() -> void:
 	day += 1
-	# Обновляем предложения на рынке
-	MarketGenerator.generate_offers(self, randi_range(3, 7))
+	var count: int = randi_range(3, 7)
+	MarketGenerator.generate_offers(self, count)
 	emit_signal("day_changed", day)
 	emit_signal("market_changed")
 
 
-## --- Репутация --------------------------------------------------------------
+# --- Репутация --------------------------------------------------------------
 
 func add_reputation(delta_rep: float) -> void:
 	reputation = clamp(reputation + delta_rep, 0.0, 1.0)
 	emit_signal("reputation_changed", reputation)
 
 
-## --- Гараж ------------------------------------------------------------------
+# --- Гараж ------------------------------------------------------------------
 
 func add_to_garage(bike: Motorcycle) -> bool:
 	if garage.size() >= garage_slots:
@@ -99,7 +96,6 @@ func get_garage_bike(index: int) -> Motorcycle:
 
 
 func buy_upgrade_slot() -> bool:
-	"""Расширить гараж на 1 слот."""
 	if spend_money(SLOT_UPGRADE_COST):
 		garage_slots += 1
 		emit_signal("garage_changed")
@@ -107,10 +103,9 @@ func buy_upgrade_slot() -> bool:
 	return false
 
 
-## --- Рынок ------------------------------------------------------------------
+# --- Рынок ------------------------------------------------------------------
 
 func buy_from_market(offer_index: int) -> bool:
-	"""Купить мотоцикл с рынка по индексу предложения."""
 	if offer_index < 0 or offer_index >= market_offers.size():
 		return false
 	var bike: Motorcycle = market_offers[offer_index]
@@ -126,5 +121,4 @@ func buy_from_market(offer_index: int) -> bool:
 
 
 func refresh_market() -> void:
-	"""Обновить предложения на рынке (кнопка «Новый день»)."""
 	next_day()
