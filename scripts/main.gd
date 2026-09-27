@@ -31,17 +31,17 @@ func _ready() -> void:
 	garage_btn.pressed.connect(show_garage)
 	expand_garage_btn.pressed.connect(_on_expand)
 	next_day_btn.pressed.connect(_on_next_day)
-	# Подключаем кнопку закрытия рынка только после того, как узел точно существует
 	var close_btn_path: NodePath = "MarketPanel/MarketDialog/MarketVBox/CloseBtn"
 	if has_node(close_btn_path):
 		get_node(close_btn_path).pressed.connect(show_garage)
-	# Отложенно подключаем сигналы market_changed, чтобы UI успел инициализироваться
 	call_deferred("_connect_market_signals")
 	_on_money_changed(GameManager.money)
 	_on_day_changed(GameManager.day)
 	_on_rep_changed(GameManager.reputation)
 	call_deferred("_update_viewport_size")
 	get_tree().root.size_changed.connect(_update_viewport_size)
+	# Выставляем нормальное сглаживание для текстур (чтобы не было пиксельно)
+	RenderingServer.set_default_canvas_texture_filter(RenderingServer.CANVAS_TEXTURE_FILTER_LINEAR)
 	await get_tree().process_frame
 	show_garage()
 
@@ -55,10 +55,21 @@ func _connect_market_signals() -> void:
 
 
 func _on_next_day() -> void:
-	# Перед перемоткой дня сбрасываем любое открытое меню (защита от вылета)
 	_hide_all()
 	garage_viewport.visible = true
 	GameManager.next_day()
+
+
+func _bring_to_front(panel: Control) -> void:
+	# Аналог .raise() (появился в 4.2) для совместимости с 4.0:
+	# перевешиваем панель последним ребёнком — она рисуется поверх всех.
+	if not is_instance_valid(panel):
+		return
+	var parent: Node = panel.get_parent()
+	if parent == null:
+		return
+	parent.remove_child(panel)
+	parent.add_child(panel)
 
 
 func _update_viewport_size() -> void:
@@ -70,6 +81,8 @@ func _update_viewport_size() -> void:
 	if s.y < 240:
 		s.y = 240
 	viewport.size = s
+	# Гарантируем линейную фильтрацию в SubViewport (чтобы графика не пикселилась)
+	viewport.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 
 
 func _on_money_changed(v: int) -> void:
@@ -100,8 +113,7 @@ func show_market() -> void:
 	_hide_all()
 	garage_viewport.visible = true
 	market_panel.visible = true
-	if is_instance_valid(market_panel):
-		market_panel.raise()
+	_bring_to_front(market_panel)
 	if market_script and market_script.has_method("refresh"):
 		market_script.call_deferred("refresh")
 
@@ -115,7 +127,7 @@ func show_workshop(bike_index: int) -> void:
 	_hide_all()
 	garage_viewport.visible = true
 	workshop_panel.visible = true
-	workshop_panel.raise()
+	_bring_to_front(workshop_panel)
 	if workshop_script and workshop_script.has_method("show_for"):
 		workshop_script.show_for(bike_index)
 
@@ -124,7 +136,7 @@ func show_sell_menu(bike_index: int) -> void:
 	_hide_all()
 	garage_viewport.visible = true
 	sell_panel.visible = true
-	sell_panel.raise()
+	_bring_to_front(sell_panel)
 	if sell_script and sell_script.has_method("show_for"):
 		sell_script.show_for(bike_index)
 
