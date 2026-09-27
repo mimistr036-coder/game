@@ -17,6 +17,7 @@ script = ExtResource("1_main")
 anchor_right = 1.0
 anchor_bottom = 1.0
 stretch = true
+texture_filter = 1
 
 [node name="SubViewport" type="SubViewport" parent="GarageViewportContainer"]
 size = Vector2i(1280, 720)

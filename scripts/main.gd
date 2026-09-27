@@ -81,8 +81,6 @@ func _update_viewport_size() -> void:
 	if s.y < 240:
 		s.y = 240
 	viewport.size = s
-	# Гарантируем линейную фильтрацию в SubViewport (чтобы графика не пикселилась)
-	viewport.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 
 
 func _on_money_changed(v: int) -> void:
