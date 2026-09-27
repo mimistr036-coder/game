@@ -53,7 +53,8 @@ func _make_card(bike: Motorcycle, index: int) -> PanelContainer:
 			bike.price_sell, real, deal_hint
 		]
 	info.bbcode_enabled = true
-	info.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	# 3 = AUTOWRAP_WORD_SMART (совместимо с Godot 4.0)
+	info.autowrap_mode = 3
 	vbox.add_child(info)
 
 	var hbox := HBoxContainer.new()

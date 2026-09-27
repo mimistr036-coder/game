@@ -20,7 +20,6 @@ stretch = true
 
 [node name="SubViewport" type="SubViewport" parent="GarageViewportContainer"]
 size = Vector2i(1200, 800)
-render_target_update_mode = 3
 physics_object_picking = true
 handle_input_locally = true
 

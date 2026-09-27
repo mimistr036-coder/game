@@ -51,7 +51,7 @@ func _generate_offers() -> void:
 	if GameManager.reputation > 0.6:
 		count = max(count, 2)
 	for i in count:
-		var name: String = BUYER_NAMES.pick()
+		var name: String = BUYER_NAMES[randi() % BUYER_NAMES.size()]
 		var offer_price: int = int(real * randf_range(0.75, 1.2 + 0.1 * GameManager.reputation))
 		offers.append({"name": name, "price": offer_price})
 		offers_container.add_child(_make_offer_row(i))

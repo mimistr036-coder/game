@@ -14,9 +14,10 @@ static func generate_offers(game: Node, count: int) -> void:
 
 static func _generate_bike(reputation: float) -> Motorcycle:
 	var bike := Motorcycle.new()
-	bike.brand = Motorcycle.BRANDS.pick()
+	var brands: Array = Motorcycle.BRANDS
+	bike.brand = brands[randi() % brands.size()]
 	var models: Array = Motorcycle.MODELS_BY_BRAND[bike.brand]
-	bike.model = models.pick()
+	bike.model = models[randi() % models.size()]
 
 	var year_min: int = 1990
 	var year_max: int = 2024
@@ -38,7 +39,7 @@ static func _generate_bike(reputation: float) -> Motorcycle:
 		bike.rarity = randf_range(0.7, 1.0)
 
 	bike.base_value = _generate_base_value(bike.brand, bike.rarity, bike.engine_hp)
-	bike.body_color = Motorcycle.PAINT_COLORS.pick()
+	bike.body_color = Motorcycle.PAINT_COLORS[randi() % Motorcycle.PAINT_COLORS.size()]
 
 	var real: int = bike.calc_real_value()
 	bike.price_buy = real

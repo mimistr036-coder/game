@@ -65,7 +65,7 @@ func show_market() -> void:
 	_hide_all()
 	garage_viewport.visible = true
 	market_panel.visible = true
-	market_panel.move_to_front()
+	market_panel.raise()
 	if market_script.has_method("refresh"):
 		market_script.refresh()
 
@@ -79,7 +79,7 @@ func show_workshop(bike_index: int) -> void:
 	_hide_all()
 	garage_viewport.visible = true
 	workshop_panel.visible = true
-	workshop_panel.move_to_front()
+	workshop_panel.raise()
 	if workshop_script.has_method("show_for"):
 		workshop_script.show_for(bike_index)
 
@@ -88,7 +88,7 @@ func show_sell_menu(bike_index: int) -> void:
 	_hide_all()
 	garage_viewport.visible = true
 	sell_panel.visible = true
-	sell_panel.move_to_front()
+	sell_panel.raise()
 	if sell_script.has_method("show_for"):
 		sell_script.show_for(bike_index)
 

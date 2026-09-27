@@ -25,8 +25,14 @@ func _ready() -> void:
 		btn.custom_minimum_size = Vector2(40, 40)
 		var sb := StyleBoxFlat.new()
 		sb.bg_color = c
-		sb.set_corner_radius_all(4)
-		sb.set_border_width_all(2)
+		sb.corner_radius_top_left = 4
+		sb.corner_radius_top_right = 4
+		sb.corner_radius_bottom_left = 4
+		sb.corner_radius_bottom_right = 4
+		sb.border_width_left = 2
+		sb.border_width_right = 2
+		sb.border_width_top = 2
+		sb.border_width_bottom = 2
 		sb.border_color = Color(0.1, 0.1, 0.1)
 		btn.add_theme_stylebox_override("normal", sb)
 		var hover: StyleBoxFlat = sb.duplicate() as StyleBoxFlat
