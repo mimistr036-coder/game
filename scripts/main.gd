@@ -40,8 +40,6 @@ func _ready() -> void:
 	_on_rep_changed(GameManager.reputation)
 	call_deferred("_update_viewport_size")
 	get_tree().root.size_changed.connect(_update_viewport_size)
-	# Выставляем нормальное сглаживание для текстур (чтобы не было пиксельно)
-	RenderingServer.set_default_canvas_texture_filter(RenderingServer.CANVAS_TEXTURE_FILTER_LINEAR)
 	await get_tree().process_frame
 	show_garage()
 
