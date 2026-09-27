@@ -101,7 +101,7 @@ func _build_slots_positions() -> void:
 	var start_x: float = -4.0
 	var spacing: float = 2.0
 	for i in SLOTS_MAX_VISUAL:
-		var row: int = i / 5
+		var row: int = int(i / 5)
 		var col: int = i % 5
 		var pos := Vector3(start_x + col * spacing, 0.05, -3.5 + row * 2.5)
 		_slots_positions.append(pos)
@@ -122,11 +122,12 @@ func _build_garage_geometry() -> void:
 	gate_mat.metallic = 0.6
 
 	# Пол
-	var floor := CSGBox3D.new()
-	floor.size = Vector3(14, 0.2, 10)
-	floor.position = Vector3(0, -0.1, 0)
-	floor.material = floor_mat
-	garage_root.add_child(floor)
+	var floor_mesh := CSGBox3D.new()
+	floor_mesh.name = "Floor"
+	floor_mesh.size = Vector3(14, 0.2, 10)
+	floor_mesh.position = Vector3(0, -0.1, 0)
+	floor_mesh.material = floor_mat
+	garage_root.add_child(floor_mesh)
 
 	# Разметка слотов
 	for i in SLOTS_MAX_VISUAL:
@@ -203,7 +204,8 @@ func _build_garage_geometry() -> void:
 	env_data.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env_data.ambient_light_color = Color(0.55, 0.6, 0.65)
 	env_data.ambient_light_energy = 0.5
-	env_data.tonemap_mode = Environment.TONE_MAPPING_ACES
+	# TONE_MAPPING_ACES появился в 4.2+, в 4.0 используем TONE_MAPPING_FILMIC (1)
+	env_data.tonemap_mode = 1
 	env.environment = env_data
 	garage_root.add_child(env)
 
