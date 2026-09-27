@@ -14,7 +14,7 @@ static func generate_offers(game: Node, count: int) -> void:
 
 static func _generate_bike(reputation: float) -> Motorcycle:
 	var bike := Motorcycle.new()
-	bike.brand = BRANDS.pick()
+	bike.brand = Motorcycle.BRANDS.pick()
 	var models: Array = Motorcycle.MODELS_BY_BRAND[bike.brand]
 	bike.model = models.pick()
 
