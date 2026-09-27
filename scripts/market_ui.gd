@@ -53,7 +53,7 @@ func _make_card(bike: Motorcycle, index: int) -> PanelContainer:
 			bike.price_sell, real, deal_hint
 		]
 	info.bbcode_enabled = true
-	info.autowrap_mode = Label.AutowrapMode(3)
+	info.autowrap_mode = 3
 	vbox.add_child(info)
 
 	var hbox := HBoxContainer.new()

@@ -41,8 +41,6 @@ func _ready() -> void:
 	# Подстраиваем размер 3D-viewport'а под окно
 	call_deferred("_update_viewport_size")
 	get_tree().root.size_changed.connect(_update_viewport_size)
-	# Растягиваем окно на весь экран при старте
-	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_MAXIMIZED)
 	await get_tree().process_frame
 	show_garage()
 

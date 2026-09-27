@@ -242,8 +242,7 @@ func _build_garage_geometry() -> void:
 	env_data.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
 	env_data.ambient_light_color = Color(0.55, 0.6, 0.65)
 	env_data.ambient_light_energy = 0.5
-	# Явно приводим tonemap_mode через тип enum, чтобы не было ворнинга
-	env_data.tonemap_mode = Environment.ToneMapper(0)
+	env_data.tonemap_mode = 0
 	env.environment = env_data
 	garage_root.add_child(env)
 
