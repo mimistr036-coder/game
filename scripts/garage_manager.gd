@@ -74,7 +74,7 @@ func _pick_motorcycle(mouse_pos: Vector2) -> void:
 	query.collide_with_bodies = true
 	query.collide_with_areas = false
 	var result := space.intersect_ray(query)
-	if not result or not result.has("collider"):
+	if result.is_empty() or not result.has("collider"):
 		return
 	var col: Node = result["collider"]
 	# Идём вверх по родителям, ищем узел Motorcycle3D в группе
